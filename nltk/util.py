@@ -415,12 +415,13 @@ def acyclic_breadth_first(tree, children=iter, maxdepth=-1, verbose=False):
                     if child not in traversed:
                         queue.append((child, depth + 1))
                     else:
-                        warnings.warn(
-                            "Discarded redundant search for {} at depth {}".format(
-                                child, depth + 1
-                            ),
-                            stacklevel=2,
-                        )
+                        if verbose:
+                            warnings.warn(
+                                "Discarded redundant search for {} at depth {}".format(
+                                    child, depth + 1
+                                ),
+                                stacklevel=2,
+                            )
             except TypeError:
                 pass
 
