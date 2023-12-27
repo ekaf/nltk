@@ -405,26 +405,25 @@ def acyclic_breadth_first(tree, children=iter, maxdepth=-1, verbose=False):
     """
     traversed = set()
     queue = deque([(tree, 0)])
-    # Add an indented block of code here
     while queue:
         node, depth = queue.popleft()
         yield node
         traversed.add(node)
-    if depth != maxdepth:
-        try:
-            for child in children(node):
-                if child not in traversed:
-                    queue.append((child, depth + 1))
-                else:
-                    if verbose:
+        if depth != maxdepth:
+            try:
+                for child in children(node):
+                    if child not in traversed:
+                        queue.append((child, depth + 1))
+                    else:
                         warnings.warn(
                             "Discarded redundant search for {} at depth {}".format(
                                 child, depth + 1
-                                ),
+                            ),
                             stacklevel=2,
-                            )
-        except TypeError:
-            pass
+                        )
+            except TypeError:
+                pass
+
 
 
 def acyclic_depth_first(
