@@ -306,8 +306,8 @@ def edges2dot(edges, shapes=None, attr=None):
     :return: a representation of 'edges' as a string in the DOT graph language.
 
     Returns dot_string: a representation of 'edges' as a string in the DOT
-        graph language, which can be converted to an image by the 'dot' program
-        from the Graphviz package, or nltk.parse.dependencygraph.dot2img(dot_string).
+    graph language, which can be converted to an image by the 'dot' program
+    from the Graphviz package, or nltk.parse.dependencygraph.dot2img(dot_string).
 
     >>> import nltk
     >>> from nltk.util import edges2dot
