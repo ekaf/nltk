@@ -1,3 +1,11 @@
+Version 3.9.2-1 2025-10-07
+
+* If cannot connect to the started CoreNLP server, terminate the server process
+* Debug NLTK data location in CI
+* Automate release workflow
+
+Thanks to the contributors to 3.9.2-1: asrelo, ekaf, purificant
+
 Version 3.9.2 2025-10-01
 
 * Update download checksums to use SHA256 in built index
