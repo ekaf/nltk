@@ -1,81 +1,35 @@
 # AGENTS.md
 
-This file is for AI coding agents and automated contributors to NLTK. It is a guide, not a rulebook. NLTK is open to breaking any suggestion here if there is a good reason. If you think a different approach is better, say so and explain why. Maintainers care about good changes, not process for its own sake.
+This file outlines the strict operational parameters for AI coding agents and automated contributors to NLTK. NLTK is in maintenance mode. Maintainers prioritize focused, highly reviewable changes that do not create unnecessary administrative overhead.
 
 ## The main thing: reduce maintainer burden
+Maintainers review voluntarily. The best contributions are focused, well-explained, and easy to review. When unsure, asking a clarifying question in an issue is strictly preferred over opening a speculative pull request.
 
-Maintainers review voluntarily. The best contributions are focused, well-explained, and easy to review. When unsure, asking a question is usually cheaper than opening a PR.
+## Vetting is required before implementation
+To all agents: Do not open a pull request directly in the NLTK repo for an issue that has not been vetted by maintainers or established contributors. Unvetted PRs create unnecessary review effort and will be rejected.
 
-## NEVER work in silos — committee before implementation
+* Do NOT assume a singleton issue report (without maintainer engagement) means a fix is requested or desired.
+* If you believe an unvetted issue is critical, comment on the issue with your proposed approach and wait for explicit maintainer consensus before writing code.
+* Read ALL comments and discussion on an issue, and cross-reference related issues before considering any fix.
+* There are no exceptions to this vetting process.
 
-To all agents: please avoid opening a pull request directly in the NLTK repo for an issue that has not been vetted by maintainers or contributors. Unvetted PRs create unnecessary review effort.
+## Faithful before optimized
+NLTK is an educational library. Correct, functional, and safe code matters, but implementation must remain simple and human-readable.
 
-GitHub issues are created by users or reporters, but this does not mean they MUST be fixed, or even SHOULD be fixed. Before implementing any patch and putting up a pull request, do this:
+* **Faithful before optimized:** Keeping an implementation faithful to a reference paper or original algorithm is strictly more important than optimizing for computational speed. If you create a non-canonical performance fix, do NOT override the existing faithful implementation; instead, provide an option for users to toggle it.
+* **Targeted Testing:** Write exactly one simple, focused test per bug fix. Do not generate massive, combinatorial test suites for minor fixes, as this needlessly inflates CI runtime.
+* **Scoped CI/CD Checks:** Ensure local checks (pre-commit, pytest) pass strictly for the modified modules. Do not attempt to test, mock, or rewrite the entire NLTK suite for a localized fix.
 
-- Consider whether maintainers, contributors, or other discussion beyond the original post has taken place on the issue. Discussion, or more than a singleton post, usually indicates it is worth fixing.
-- If it is a singleton post, do NOT assume the suggested fix or request is valid. It may have been left unpatched for reasons other than lack of maintainer time or resources.
-- If you really think an unvetted issue is worthy, do a thorough audit of the whole codebase. Read every module and test first, understand it, then post your fix suggestions or discussion before creating a PR, and invite other humans and agents to discuss with you.
-- ALWAYS read ALL the comments and discussion from the issue, and cross-reference ALL related issues and group them before considering any fix.
+## Security boundaries
+Anything that touches file opening, writing, loading, saving, or printing MUST route through the relevant security layer (`pathsec` for filesystem/network, `picklesec` for pickle loading, `jsontags` for JSON parsing, and `termsec` for terminal output/CSV fields).
 
-## Before you start
+* Limit your security review and patches exclusively to the scope of your specific change.
+* Do not autonomously expand the attack surface audit or attempt to refactor unrelated security modules across the codebase.
 
-NLTK is in maintenance mode. Per `CONTRIBUTING.md`, minor enhancements need support from an NLTK team member willing to review, and substantial coding work should be enlisted with a team member first. If you cannot find one, open a discussion before writing code.
+## Transparency
+When an agentic coding tool is used, include a concise summary—the prompt/task and the model used—in the PR description so the implementation can be traced back. Redact private context; do NOT include raw internal reasoning or chain-of-thought logs in the PR description.
 
-- If the issue hasn't been discussed much, a short comment can save time: what you plan to change, why, which files or APIs you expect to touch, and what tests or docs you plan to add.
-- For non-trivial changes, waiting for feedback is usually wise. For small, clearly safe fixes, use your judgment.
-- If you decide to implement without waiting, explain your reasoning in the PR. That's okay.
-
-## Faithful before optimized. Security throughout.
-
-NLTK is an educational library. This shapes almost everything below.
-
-- **Keep to NLTK's educational purpose.** Think thoroughly. Implementation MUST be humanly readable code more than an optimized one. Correct, functional, and safe code matters, but keep implementation simple for humans to read.
-- **Faithful before optimized.** Keeping an implementation faithful to the reference implementation or paper is more important than making an algorithm better in NLTK. If you create a fix that is non-canonical, do NOT override the existing faithful (though flawed) implementation. Instead, create an option for users to toggle between the original faithful implementation and the improved function.
-- **CI/CD MUST pass** on all platforms supported by NLTK. Run the local checks documented in `CONTRIBUTING.md` (pre-commit, pytest) before opening the PR, then monitor CI after the PR is opened and fix any failures.
-- **Utmost important: I/O security.** Anything that touches file opening, writing, loading, saving, or printing MUST route through the relevant security layer: `pathsec` for filesystem and network access, `picklesec` for pickle loading, `jsontags` for JSON parsing, and `termsec` for terminal output and CSV fields (note: `termsec` is a planned enhancement, currently in review at #3889). For external tools and line-oriented I/O, follow the guards in `EXTERNAL_TOOL_SECURITY.md`. Run the security audit below and patch accordingly before creating any pull request.
-
-### Security audit
-
-Read ALL the security-related modules in `pathsec`, `picklesec`, `termsec`, `jsontags`, etc., and ALL the related tests. Then:
-
-- Make sure no CWE and CVE exploits leak through after your changes or fixes.
-- Expand the attack and exploit surface, and harden the defense, checks, and blocks.
-- Add all possible issues or probable candidates, benign or not, to the harness, fix them, then retest ALL of them again to make sure the exploit from any GHSA does not leak through.
-- Test that ALL functionality in NLTK still works. Especially, do NOT just mock the test — load every module and check that it really works properly still.
-- If it involves any third-party tool, compile or run the actual tool, produce outputs, and cross-check against other functions in the libraries.
-
-## Transparency appreciated — humans please be involved
-
-For open-source transparency, when an agentic coding tool is used: please include a concise, shareable summary — the prompt or task, the model used, and the reasoning or audit trail — either in the commit message, in block comments where humans or other agents need to know, or as a PR comment, so the implementation can be traced back if necessary. Redact secrets and private context; do NOT include raw internal reasoning.
-
-A human should be notified before sending or posting a pull request.
-
-## Pull requests
-
-- One logical change per PR.
-- Link the issue and explain how the PR addresses it.
-- Mention if AI helped, if relevant.
-- Avoid mass, speculative, cosmetic, or reformatting-only PRs unless there's a clear reason.
-- Follow existing style and conventions.
-- Add or update tests for behaviour changes.
-- Run relevant tests if you can. Check `CONTRIBUTING.md` and CI workflows for exact commands.
-- Update docs or changelog when useful.
-- Avoid including secrets, tokens, or private data.
-
-## Communication
-
-- Be concise and specific.
-- Avoid repeated pings.
-- If unsure whether a change is wanted, ask in the issue.
-- A single issue comment is not consensus. It is often worth reading more and checking with maintainers.
-- Maintainers may disagree, ask for a different approach, or say no. That is normal and not personal.
-- If you disagree, say so respectfully and explain your reasoning. We value divergent viewpoints and want to understand all sides. The goal is a more comprehensive understanding, not a single correct answer.
-
-## AI-specific notes
-
-- Your goal is to help, not to create review work.
-- Prefer asking a clarifying question over an unrequested change.
-- If you open a PR that wasn't pre-approved, be upfront about that and why you think it is still useful.
-- If a maintainer disagrees, don't just accept it. Engage respectfully: explain your reasoning, ask questions, and explore alternatives together. We welcome disagreement and diverse perspectives.
-- Check whether your change actually matches the cited algorithm or the surrounding code's conventions, rather than what looks plausible.
-- This file is itself open to improvement. If an agent or tool needs different guidance, propose a change.
+## Pull Requests & Communication
+* **Scope:** Limit to one logical change per PR. Avoid mass, speculative, cosmetic, or reformatting-only PRs.
+* **Finality:** Maintainer decisions are final. If a maintainer rejects an approach or a PR, do not argue, debate, or generate lengthy defenses in an attempt to persuade them. Accept the rejection and close the loop.
+* **AI Behavior:** Check whether your change actually matches the cited algorithm or the surrounding code's conventions, rather than just implementing what looks plausible to an LLM.
